@@ -12,10 +12,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class Hello  {
-    public static int add(int a, int b) {
+    public static void add(int a, int b,ApiCallback apiCallback) {
         int sum=a+b;
 
-        return sum;
+        apiCallback.response(sum);
     }
 
 
