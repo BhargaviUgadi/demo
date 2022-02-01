@@ -12,17 +12,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class Hello  {
-    public void result(Context c, int a, int b, int result) {
+    public static int add(int a, int b) {
+        int sum=a+b;
 
-        result=a+b;
-
-        Toast.makeText(c,result, Toast.LENGTH_SHORT).show();
-
-
-
-
-
-
+        return sum;
     }
 
 
