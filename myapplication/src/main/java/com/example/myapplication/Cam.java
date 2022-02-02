@@ -1,10 +1,11 @@
 package com.example.myapplication;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
@@ -26,55 +28,54 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.File;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class Cam extends AppCompatActivity {
 
-    private Executor executor= Executors.newSingleThreadExecutor();
-    private static int REQUEST_CODE=1001;
-    private static final String[] Requires_Permission= new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
+    private Executor executor = Executors.newSingleThreadExecutor();
+    private int REQUEST_CODE = 1001;
+    private final String[] Requires_Permission = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
-    PreviewView previewView,previewView1;
+    PreviewView previewView, previewView1;
+    Uri imageCaptureUri;
     ImageView captureimage;
-    String contentValues,path;
+    String contentValues;
+    String path;
+    static String file;
+    ImageCapture.OutputFileOptions outputFileOptions;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cam);
-        previewView=findViewById(R.id.camera);
+        previewView = findViewById(R.id.camera);
 
-        captureimage=findViewById(R.id.captureImg);
+        captureimage = findViewById(R.id.captureImg);
 
-
-
-
-
-}
-    public void capture(String path1, Camera camera){
-
-        path1=path;
-        camera.responsecam(path1);
-
-
-
-
-        if(allPermissionGranted()){
+        if (allPermissionGranted()) {
             startCamera();
 
+        } else {
+            ActivityCompat.requestPermissions(Cam.this, Requires_Permission, REQUEST_CODE);
         }
-        else {
-            ActivityCompat.requestPermissions(Cam.this,Requires_Permission,REQUEST_CODE);
-        }
-
 
     }
 
-    private void startCamera() {
+    private boolean allPermissionGranted() {
+        for (String permission : Requires_Permission) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-        final ListenableFuture<ProcessCameraProvider> cameraProviderListenableFuture= ProcessCameraProvider.getInstance(this);
+    private void startCamera() {
+        final ListenableFuture<ProcessCameraProvider> cameraProviderListenableFuture = ProcessCameraProvider.getInstance(this);
 
         cameraProviderListenableFuture.addListener(new Runnable() {
             @Override
@@ -87,82 +88,77 @@ public class Cam extends AppCompatActivity {
                 }
 
             }
-        }, ContextCompat.getMainExecutor(Cam.this));
-
+        }, ContextCompat.getMainExecutor(this));
 
 
     }
 
     private void bindPreview(ProcessCameraProvider cameraProvider) {
+        Preview preview = new Preview.Builder().build();
 
-        Preview preview= new Preview.Builder().build();
 
+        CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
 
-        CameraSelector cameraSelector= new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
+        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder().build();
+        ImageCapture imageCapture = new ImageCapture.Builder().build();
 
-        ImageAnalysis imageAnalysis= new ImageAnalysis.Builder().build();
-        ImageCapture imageCapture= new ImageCapture.Builder().build();
-
-        ImageCapture.Builder builder= new ImageCapture.Builder();
+        ImageCapture.Builder builder = new ImageCapture.Builder();
 
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
-        androidx.camera.core.Camera camera= cameraProvider.bindToLifecycle((LifecycleOwner) this,cameraSelector,imageAnalysis,imageCapture,preview);
+        Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, imageAnalysis, imageCapture, preview);
         captureimage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                long times= System.currentTimeMillis();
-                ContentValues contentValues= new ContentValues();
-//                contentValues=contentValues;
-                path="images/jpeg";
-                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME,times);
-                contentValues.put(MediaStore.MediaColumns.MIME_TYPE,path);
+
+                long times = System.currentTimeMillis();
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, times);
+                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    imageCapture.takePicture(
-                            new ImageCapture.OutputFileOptions.Builder(getContentResolver(), MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues).build(), getMainExecutor(), new ImageCapture.OnImageSavedCallback() {
-                                @Override
-                                public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                                    Toast.makeText(Cam.this, "Photo Saved Succesfully", Toast.LENGTH_SHORT).show();
 
-                                }
+                     file = String.valueOf(new File(getBatchDirectoryName() + ".jpg"));
+                    outputFileOptions = new ImageCapture.OutputFileOptions.Builder(new File(file)).build();
 
-                                @Override
-                                public void onError(@NonNull ImageCaptureException exception) {
-                                    Toast.makeText(Cam.this,"Error in Saving Photo"+ exception.getMessage(), Toast.LENGTH_SHORT).show();
+                    imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
+                        @Override
+                        public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                            Toast.makeText(Cam.this, "Photo saved successfully", Toast.LENGTH_SHORT).show();
+                        }
 
-                                }
-                            }
-                    );
+                        @Override
+                        public void onError(@NonNull ImageCaptureException exception) {
+
+                            Toast.makeText(Cam.this, "Error" + exception, Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+
                 }
+
+
+            }
+
+            private String getBatchDirectoryName() {
+
+
+                String app_folder_path = "";
+                app_folder_path = Environment.getExternalStorageDirectory().toString() + "/images";
+                File dir = new File(app_folder_path);
+                if (!dir.exists() && !dir.mkdirs()) {
+
+                }
+
+                return app_folder_path;
+
             }
         });
-
-
     }
+    public static void capture(String path,CameraCallback cameraCallback){
+        path=file;
+        capture(path, cameraCallback);
 
-
-
-    private boolean allPermissionGranted() {
-        for(String permission:Requires_Permission){
-            if(ContextCompat.checkSelfPermission(Cam.this,permission)!= PackageManager.PERMISSION_GRANTED){
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode==REQUEST_CODE){
-            if(allPermissionGranted()){
-                startCamera();
-            }
-            else {
-                Toast.makeText(Cam.this, "Permission Not Grant By the User", Toast.LENGTH_SHORT).show();
-                this.finish();
-            }
-        }
     }
 }

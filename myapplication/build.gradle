@@ -10,7 +10,7 @@ android {
         minSdk 21
         targetSdk 32
         versionCode 1
-        versionName "1.2.3"
+        versionName "1.2.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -52,7 +52,7 @@ afterEvaluate {
                 from components.release
 
                 groupId='com.github.BhargaviUgadi'
-                version='1.2.3'
+                version='1.2.4'
             }
         }
     }

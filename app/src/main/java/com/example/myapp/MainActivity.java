@@ -8,11 +8,14 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.myapplication.ApiCallback;
+import com.example.myapplication.Cam;
+import com.example.myapplication.CameraCallback;
 import com.example.myapplication.Hello;
 
 public class MainActivity extends AppCompatActivity implements ApiCallback {
 
-    Button btn,btn1,btn2;
+    Button btn,btn1,btn2,btn3;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements ApiCallback {
         btn=findViewById(R.id.btn1);
         btn1=findViewById(R.id.btn2);
         btn2=findViewById(R.id.btn3);
+        btn3=findViewById(R.id.btn);
 
 
         btn.setOnClickListener(new View.OnClickListener() {
@@ -56,13 +60,28 @@ public class MainActivity extends AppCompatActivity implements ApiCallback {
 
             }
         });
+        String path = null;
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Cam.capture(path,camera1);
 
 
-
-
-
-
+            }
+        });
     }
+    CameraCallback camera1= new CameraCallback() {
+        @Override
+        public void responsecam(String path) {
+            Toast.makeText(MainActivity.this, ""+path, Toast.LENGTH_SHORT).show();
+
+
+        }
+    };
+
+
+
     ApiCallback apiCallback1 = new ApiCallback() {
         @Override
         public void response(int result) {
