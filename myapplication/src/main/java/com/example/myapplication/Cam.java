@@ -1,12 +1,17 @@
 package com.example.myapplication;
 
+import static android.os.Environment.DIRECTORY_PICTURES;
+import static android.os.Environment.getExternalStorageDirectory;
+
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
+import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -29,23 +34,30 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class Cam extends AppCompatActivity {
 
-    private Executor executor = Executors.newSingleThreadExecutor();
-    private int REQUEST_CODE = 1001;
+    private final Executor executor = Executors.newSingleThreadExecutor();
+    private final int REQUEST_CODE = 1001;
     private final String[] Requires_Permission = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
     PreviewView previewView, previewView1;
     Uri imageCaptureUri;
     ImageView captureimage;
+    String app_folder_path = "";
     String contentValues;
     String path;
-    static String file;
+//    static File fileofimage;
+    static String qqq ;
+      File file;
+    static File fileofImage;
+
     ImageCapture.OutputFileOptions outputFileOptions;
 
     @Override
@@ -110,18 +122,32 @@ public class Cam extends AppCompatActivity {
         captureimage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                long times = System.currentTimeMillis();
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, times);
-                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+//
+//                long times = System.currentTimeMillis();
+//                ContentValues contentValues = new ContentValues();
+//                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, times);
+//                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
+//                     fileofImage = new File(String.valueOf(getExternalFilesDir(DIRECTORY_PICTURES)));
 
-                     file = String.valueOf(new File(getBatchDirectoryName() + ".jpg"));
-                    outputFileOptions = new ImageCapture.OutputFileOptions.Builder(new File(file)).build();
 
-                    imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback() {
+                    file = new File(getExternalFilesDir(DIRECTORY_PICTURES).getAbsolutePath() +mDateFormat.format(new Date())+ ".jpeg");
+
+//                    Toast.makeText(Cam.this, qqq, Toast.LENGTH_SHORT).show();
+                     qqq= String.valueOf(new File(file.getAbsolutePath()));
+
+
+
+
+
+
+//                     file1.getAbsolutePath();
+
+                    outputFileOptions = new ImageCapture.OutputFileOptions.Builder(file).build();
+
+                    imageCapture.takePicture(outputFileOptions, getMainExecutor(), new ImageCapture.OnImageSavedCallback() {
                         @Override
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                             Toast.makeText(Cam.this, "Photo saved successfully", Toast.LENGTH_SHORT).show();
@@ -131,6 +157,7 @@ public class Cam extends AppCompatActivity {
                         public void onError(@NonNull ImageCaptureException exception) {
 
                             Toast.makeText(Cam.this, "Error" + exception, Toast.LENGTH_SHORT).show();
+                            Log.d("eee", exception.getMessage());
 
                         }
                     });
@@ -141,24 +168,66 @@ public class Cam extends AppCompatActivity {
 
             }
 
-            private String getBatchDirectoryName() {
-
-
-                String app_folder_path = "";
-                app_folder_path = Environment.getExternalStorageDirectory().toString() + "/images";
-                File dir = new File(app_folder_path);
-                if (!dir.exists() && !dir.mkdirs()) {
-
-                }
-
-                return app_folder_path;
-
-            }
         });
     }
-    public static void capture(String path,CameraCallback cameraCallback){
-        path=file;
-        capture(path, cameraCallback);
 
+    public static void capture(String path, CameraCallback cameraCallback) {
+
+//        try {
+//          String qqq=path;
+//            cameraCallback.responsecam(qqq);
+//
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.d("HHH",e.getMessage());
+//        }
+
+
+//        path=String.valueOf(file1);
+//        cameraCallback.responsecam(path);
+//
+//     try {
+//          qqq= file.toString();
+//         path=qqq;
+//         cameraCallback.responsecam(path);
+//     } catch (Exception e) {
+//         e.printStackTrace();
+//         Log.d("GG",e.getMessage());
+//     }
+//    try {
+//        path=file.toString();
+//        String qqq=path;
+//        cameraCallback.responsecam(qqq);
+//
+//    } catch (Exception e) {
+//        e.printStackTrace();
+//        Log.d("AA",e.getMessage());
+//    }
+
+//
+        try {
+
+//            Log.d("qqq",qq);
+//              path=String.valueOf(fileofImage);
+//            path = String.valueOf(fi);
+
+            cameraCallback.responsecam(path);
+//            Log.d("QWERT",qqq);
+            Log.d("qqq",path);
+
+
+        }catch (Exception e) {
+            e.printStackTrace();
+//            System.out.println(e.getMessage());
+    Log.d("WWW",e.getMessage());
+//}
+        }
     }
 }
+
+//    }
+
+
+
+
