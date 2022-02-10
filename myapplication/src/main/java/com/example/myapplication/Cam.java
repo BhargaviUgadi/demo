@@ -1,9 +1,10 @@
 package com.example.myapplication;
 
 import static android.os.Environment.DIRECTORY_PICTURES;
-import static android.os.Environment.getExternalStorageDirectory;
 
-import android.content.ContentValues;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
@@ -34,7 +35,7 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
-import java.nio.file.Files;
+import java.net.ResponseCache;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -48,15 +49,24 @@ public class Cam extends AppCompatActivity {
     private final String[] Requires_Permission = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
 
     PreviewView previewView, previewView1;
+    CameraCallback cameraCallback;
     Uri imageCaptureUri;
     ImageView captureimage;
+
+
+    static CameraCallback cameraCallback1;
     String app_folder_path = "";
     String contentValues;
     String path;
-//    static File fileofimage;
-    static String qqq ;
-      File file;
-    static File fileofImage;
+    String imgUri;
+    static String qwr;
+    static SimpleDateFormat mDateFormat;
+    //    static File fileofimage;
+    static String qqq;
+    static File file;
+    static File file1= new File(Environment.getExternalStoragePublicDirectory(DIRECTORY_PICTURES).getAbsolutePath());
+//    static File file1 = new File(Environment.getExternalStoragePublicDirectory(DIRECTORY_PICTURES).getAbsolutePath());
+
 
     ImageCapture.OutputFileOptions outputFileOptions;
 
@@ -129,18 +139,17 @@ public class Cam extends AppCompatActivity {
 //                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
-//                     fileofImage = new File(String.valueOf(getExternalFilesDir(DIRECTORY_PICTURES)));
+                    mDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
 
 
-                    file = new File(getExternalFilesDir(DIRECTORY_PICTURES).getAbsolutePath() +mDateFormat.format(new Date())+ ".jpeg");
+                    file = new File(getExternalFilesDir(DIRECTORY_PICTURES).getAbsolutePath() + mDateFormat.format(new Date()) + ".jpeg");
+                    imgUri=file.getPath();
+//                    imgUri = Uri.fromFile(file);
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
 
 //                    Toast.makeText(Cam.this, qqq, Toast.LENGTH_SHORT).show();
-                     qqq= String.valueOf(new File(file.getAbsolutePath()));
-
-
-
-
+//                    qqq = String.valueOf(new File(file.getAbsolutePath()));
 
 
 //                     file1.getAbsolutePath();
@@ -150,7 +159,18 @@ public class Cam extends AppCompatActivity {
                     imageCapture.takePicture(outputFileOptions, getMainExecutor(), new ImageCapture.OnImageSavedCallback() {
                         @Override
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+//                             qwr= String.valueOf(outputFileResults.getSavedUri());
+
                             Toast.makeText(Cam.this, "Photo saved successfully", Toast.LENGTH_SHORT).show();
+                            cameraCallback1.responsecam(imgUri);
+                            finish();
+
+//                            Intent intent = new Intent();
+//                            setResult(Activity.RESULT_OK, intent);
+//                            finish();
+//                            startActivity(new Intent(Cam.this,Main.class));
+//                            Intent intent= new Intent(Cam.this,com.example.myapp.MainActivity.class);
+
                         }
 
                         @Override
@@ -171,63 +191,44 @@ public class Cam extends AppCompatActivity {
         });
     }
 
-    public static void capture(String path, CameraCallback cameraCallback) {
-
-//        try {
-//          String qqq=path;
-//            cameraCallback.responsecam(qqq);
-//
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            Log.d("HHH",e.getMessage());
-//        }
-
-
-//        path=String.valueOf(file1);
-//        cameraCallback.responsecam(path);
-//
-//     try {
-//          qqq= file.toString();
-//         path=qqq;
-//         cameraCallback.responsecam(path);
-//     } catch (Exception e) {
-//         e.printStackTrace();
-//         Log.d("GG",e.getMessage());
-//     }
-//    try {
-//        path=file.toString();
-//        String qqq=path;
-//        cameraCallback.responsecam(qqq);
-//
-//    } catch (Exception e) {
-//        e.printStackTrace();
-//        Log.d("AA",e.getMessage());
-//    }
-
-//
+    public static void capture(Context context, CameraCallback cameraCallback) {
         try {
 
-//            Log.d("qqq",qq);
-//              path=String.valueOf(fileofImage);
-//            path = String.valueOf(fi);
+            File mediaFile;
+            cameraCallback1=cameraCallback;
+            Intent intent=new Intent(context,Cam.class);
+            context.startActivity(intent);
+//            mediaFile = new File(String.valueOf(file));
+//            path= String.valueOf(mediaFile);
+//            cameraCallback1.responsecam(path);
 
-            cameraCallback.responsecam(path);
-//            Log.d("QWERT",qqq);
-            Log.d("qqq",path);
 
-
-        }catch (Exception e) {
+//    this.cameraCallback.responsecam(new String());
+        } catch (Exception e) {
             e.printStackTrace();
-//            System.out.println(e.getMessage());
-    Log.d("WWW",e.getMessage());
-//}
+            Log.d("sss",e.getMessage());
+
         }
     }
-}
 
-//    }
+//return  path;
+    }
 
 
-
+////        Intent intent= new Intent(context,Cam.class);
+//
+////
+//        try {
+//           File file1= new File(getExternalStorageDirectory().getAbsolutePath());
+//
+//           path= cameraCallback.responsecam(String.valueOf(file1));
+//            Log.d("qqq", String.valueOf(file1));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.d("aaa", e.getMessage());
+//        }
+//        return path;
+//
+//
+//
 

@@ -10,6 +10,8 @@
 
 
 
+
+
     <Button
         android:text="method 1"
         android:id="@+id/btn1"
@@ -38,6 +40,31 @@
        android:layout_height="wrap_content"
        android:text="Method 5"
        tools:ignore="InvalidId" />
+
+    <Button
+        android:id="@+id/btn5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Method 6"
+        />
+
+    <Button
+        android:id="@+id/btn6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Method 7"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/resultPeview"
+        android:text=""
+        android:layout_gravity="start|center_horizontal"
+        android:layout_marginHorizontal="10dp"/>
+
+
+
+
 
 
 
